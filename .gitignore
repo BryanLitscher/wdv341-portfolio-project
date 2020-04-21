@@ -1,0 +1,26 @@
+# Ignore Mac system files
+.DS_store
+
+# Ignore node_modules folder
+node_modules
+
+# Ignore all text files
+*.txt
+
+# Ignore files related to API keys
+.env
+
+# Ignore SASS config files
+.sass-cache
+
+#Ignore ini config files
+*.ini
+
+#Ignore PDO connection file
+dbConnect.php
+
+#Ignore utility file
+reset_records.php
+
+#Ignore vendor folder
+vendor/

@@ -1,0 +1,5 @@
+<?php 
+
+$productJSON='[{"itemid":"18","description":"Three pound block amsterdam cheese","uos":"ea","unitprice":"43","imagefile":"amsterdam.jpg"},{"itemid":"19","description":"Two pound block bravo cheddar","uos":"ea","unitprice":"12","imagefile":"bravo_cheddar.jpg"},{"itemid":"20","description":"Three pound block of cheddar","uos":"ea","unitprice":"34","imagefile":"cheddar.jpg"},{"itemid":"21","description":"Three pound bag of cheese curds ","uos":"ea","unitprice":"43","imagefile":"cheese_curds.jpg"},{"itemid":"22","description":"one pound block of colby cheese","uos":"ea","unitprice":"34","imagefile":"Colby_Cheese.jpg"},{"itemid":"23","description":"One pound keens cheddar","uos":"ea","unitprice":"42","imagefile":"keens-cheddar.jpg"},{"itemid":"24","description":"Half pound limburger cheese","uos":"ea","unitprice":"24","imagefile":"limburger_cheese.jpg"},{"itemid":"25","description":"Half pound block of montforte blue cheese","uos":"ea","unitprice":"28","imagefile":"montforte_blue_cheese.jpg"},{"itemid":"26","description":"Two pound block of swiss cheese","uos":"ea","unitprice":"12","imagefile":"Swiss_cheese.jpg"}]';
+
+?>

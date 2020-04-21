@@ -1,0 +1,158 @@
+			body{background-color:linen}
+			
+			
+			
+			.card input[type=submit] {
+			  width: 100%;
+			  background-color: #4CAF50;
+			  color: white;
+			  padding: 14px 20px;
+			  margin: 8px 0;
+			  border: none;
+			  border-radius: 4px;
+			  cursor: pointer;
+			}
+			
+			.card input[type=submit]:hover {
+			  background-color: #45a049;
+			}
+			
+			.card{ 
+				border:thin solid black;
+				width:200px;
+				border-radius: 0px;
+				background-color: #f2f2f2;
+				margin: 10px;
+				}
+			.card form{padding:10px}
+				
+			ul{
+			  list-style-type: none;
+			  margin: 0;
+			  padding: 0;
+			}
+			.cart {
+				border:thin solid black;
+				margin:20px 0 20px 0;}
+				
+			.cart button, .shipping_address_form input[name=submit], .bigsubmit input[name=submit]{
+				background-color:purple;
+				width:100%;
+				color:white;
+				height:3em;
+				font-size: 1.5em; 
+				border:thick outset gray;
+				}
+			.catalog{
+				display: flex;
+				align-items: flex-end;
+				flex-wrap: wrap;
+				background-color: BurlyWood;
+				justify-content: center;
+			}
+			
+			.buttongroup{
+				display: flex;
+				justify-content: flex-end;
+				margin:0px;
+			}
+
+			
+			.cartrow{
+				display:grid;
+				grid-template-columns: 40% 10% 10% 10% 25% 5%;
+				}			
+				
+			.cartsummary{
+				display:grid;
+				grid-template-columns: 70% 25% 5%;
+				}
+				
+			.cartrow div, .cartsummary div{
+				background-color: BurlyWood;
+				border: 1px solid black;
+				text-align: center;
+				}			
+				
+			.can input{ width:100%; }
+			
+			.cartrow .total, .cartsummary .total  { 
+				font-size:4vw; 
+				background-color: BurlyWood;
+				}
+				
+			.errormessage{color:red;}
+			
+			.navbar div.toolbar_message{ 
+				color:blue;
+			}
+			
+			.navbar{
+				display: flex;
+				align-items: flex-end;
+				flex-wrap: wrap;
+				justify-content: flex-end;
+				}
+				
+			.update_delete {
+			display: flex;
+			align-items: center;
+			padding-bottom:10px;
+			}
+			.datalist{padding-left:10px;}
+			.usersection{border-bottom:thin solid black;
+				padding-bottom:10px;}
+			.editcontact{border:thin solid black;}
+			.boldbutton{ background-color:red;color:white;}
+				
+			#shipto_state{ width:250px;}
+			
+			.order{
+			display: flex;
+			align-items: center;
+			padding-bottom:10px;
+			border:thin solid black;
+			}
+			.order>div{ padding:5px}
+			
+			.orderdetailsummary{border:thin solid black;}
+
+			/***********************************************/
+			@media only screen and (max-width: 600px) {
+				body {
+					background-color:pink:
+				}
+				.cartsummary{
+					display:grid;
+					grid-template-columns: 165px auto 60px;
+					}
+				.cartsummary .total{font-size:7vw; }
+				.cartrow{
+					display:grid;
+					grid-template-columns: 55px 55px 55px auto 60px;
+					background-color: BurlyWood;
+					padding: 10px;
+					}
+					
+				.cartrow .desc {
+					grid-area: 1 / 1 / 2 / 4;
+					width:100%
+					}
+				.cartrow .total {
+					grid-area: 1 / 4 / 3 / 5;
+					font-size:7vw; 
+					}
+				.cartrow .can {
+					grid-area: 1 / 5 / 3 / 6;
+				}
+				.buttongroup, .navbar{
+					flex-direction: column;
+					justify-content: center;
+					align-items: center;
+				}
+				.buttongroup button {
+					font-size:150%;
+					width:300px;
+				}
+				.order{flex-direction: column;}
+			}

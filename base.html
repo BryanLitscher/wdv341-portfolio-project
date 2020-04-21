@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!-- https://phppot.com/demo/simple-php-shopping-cart/index.php?action=add&code=USB02 -->
+<!-- https://phppot.com/php/simple-php-shopping-cart/ -->
+<html lang="en">
+
+	<head>
+		<link href="style/style.css" rel="stylesheet" type="text/css" />
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>WDV341 Intro to PHP - Portfolio Project</title>
+		<style>
+
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<!-- <script src="scripts.js"></script> -->
+	<script>
+	$(document).ready(
+		function(){
+			//code after page loads
+		}
+	)
+	
+	</script>	
+	
+
+
+	</head>
+
+	<body>
+	
+	<!-- ajax -->
+	<script>
+		<!-- javascript -->
+		function loadDoc() {
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					//this.responseXML;
+					//this.responseText or this.responseText
+					//myFunction(this);
+					//code to run on response
+				}
+			};
+			xhttp.open("GET", "cd_catalog.xml", true);  //change url
+			xhttp.send();
+		}
+	</script>
+
+	<button style="float: right;padding:10px;">Logout</button>
+	<div style="clear: both;"></div>
+	<h1>The Cheese Store</h1>
+	<div class="cart">
+		<!-- <h1>Cart is empty</h1> -->
+		<div class="cartrow">
+			<div class="desc">Desc</div>
+			<div class="qty">Qty</div>
+			<div class="uom">Unit</div>
+			<div class="unitprice">Unit Price</div>
+			<div class="total">Total Price</div>
+			<div class="can"><input type="image" id="image" alt="can" src="images\icon-3695104_640.png" ></div>
+		</div>
+		<div class="cartrow">
+			<div class="desc">Desc</div>
+			<div class="qty">Qty</div>
+			<div class="uom">Unit</div>
+			<div class="unitprice">Unit Price</div>
+			<div class="total">Total Price</div>
+			<div class="can"><input type="image" id="image" alt="can" src="images\icon-3695104_640.png" ></div>
+		</div>
+		<button>Place Order for $100.45</button>
+	</div>
+	
+	<div class="catalog">
+		
+		<div class="card">
+			<img src="images/Swiss_cheese.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>		
+		
+		<div class="card">
+			<img src="images\cheddar.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>		
+		
+		<div class="card">
+			<img src="images/Colby_Cheese.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>		
+		
+		<div class="card">
+			<img src="images/256px-Montforte_Blue_Cheese.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>		
+		<div class="card">
+			<img src="images/Cheese_Curds.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>
+		
+		<div class="card">
+			<img src="images/256px-Bravo_Cheddar.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>
+		
+		<div class="card">
+			<img src="images/amsterdam-170394_640.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>
+		
+		<div class="card">
+			<img src="images\keens-cheddar-3514_640.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>
+		
+		<div class="card">
+			<img src="images/cheese-2829034_640.jpg" width=100%>
+			<form>
+				<ul>
+					<li>This is a description</li>
+					<li>Price: $2.50 lb. </li>
+					<li>Quantity:<input  maxlength="4" size="4" name="quantity"></li>
+				</ul>
+				<input type="hidden" name="description" value="This is a description">
+				<input type="hidden" name="price" value="2.50">
+				<input type="submit" value="Add to Cart">
+			</form>
+		</div>
+		
+
+	</div>
+
+
+	</body>
+	
+	
+
+
+</html>
+
+<!-- https://commons.wikimedia.org/wiki/File:Cheese_Curds.jpg
+https://commons.wikimedia.org/wiki/File:Montforte_Blue_Cheese.jpg
+https://commons.wikimedia.org/wiki/File:Bravo_Cheddar.jpg
+https://pixabay.com/photos/cheese-camembert-mature-cheddar-2829034/
+https://pixabay.com/photos/keens-cheddar-cheese-cheddar-3514/
+https://pixabay.com/photos/amsterdam-cheese-netherlands-170394/
+
+
+
+ -->
