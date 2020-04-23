@@ -14,35 +14,37 @@ if (!$authorized){
 	exit();
 }
 
+if ( !isset($_SESSION["dbparams"]) ) {
+	if ( strpos( strtolower($_SERVER["HTTP_REFERER"]??""), "localhost/wdv341")>=0 || strpos( strtoupper(gethostname()), "DESKTOP")>=0 ){
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["localDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["localDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["localDBParams"]["databaseName"] ;
+	} else{
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["hostDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["hostDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["hostDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
+	}
+}
+
+
+require 'mypdo.php';
+$myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
+
+
 require 'formvalidation.php';
-require 'dbConnect.php';
+//require 'dbConnect.php';
 $newUserFormErrors = array();
 $updateUserFormErrors=array();
 $showContactUpdateForm = -1;
 $showDeleteConfirmForm = -1;
 
-function getUserRecordSet(){
-	require 'dbConnect.php';
-	try {
-		$stmt = $conn->prepare("SELECT 
-			cs_user_id,
-			cs_user_name,
-			cs_user_password,
-			cs_user_rights
-			FROM cs_user");
-		$stmt->execute();
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-
-		return $stmt->fetchAll();  // associative array
-	}
-	catch(PDOException $e) {
-		echo set_statement_exception_handler($conn,$e);
-		die();	
-	}
-}
 
 
-$userRecordSet = getUserRecordSet();
+$userRecordSet = $myDB->run($AllUserQuery);
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' ) { 
@@ -50,16 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 	$purpose = $_POST["function"]??"";
 	switch ($purpose) {
 		case "confirmDelete":
-			try
-			{
-				$sql = "DELETE FROM cs_user WHERE cs_user_id=". $_POST["userid"];
-				$conn->exec($sql);
-
-				$userRecordSet = getUserRecordSet();
-			}
-			catch(PDOException $e){ 
-
-			}
+			$sql = "DELETE FROM cs_user WHERE cs_user_id=". $_POST["userid"];
+			$myDB->run($sql);
+			$userRecordSet = $myDB->run($AllUserQuery);
 			break;
 		case "updateUserDB";
 			$f = $_POST;
@@ -77,38 +72,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			$elementGroups = array(
 				"userrole" => array("userrole")
 				);
-
 			$a->setElementGroups($elementGroups);
 			if ( $a->validateForm() ){ 
-				$uname=trim($_POST["uname"]);
-				$password=trim($_POST["password"]);
-				$userrole=trim($_POST["userrole"]);
-				$userid=trim($_POST["userid"]);
-				try {
-
-					$sql = "UPDATE cs_user
-					SET 
-					cs_user_name = '$uname', 
-					cs_user_password = '$password', 
-					cs_user_rights = '$userrole' 
-					WHERE cs_user_id=$userid;";
-
-					// Prepare statement
-					$stmt = $conn->prepare($sql);
-
-					// execute the query
-					$stmt->execute();
-					
-					$userRecordSet = getUserRecordSet();
-					}
-				catch(PDOException $e)
-					{
-					//echo $sql . "<br>" . $e->getMessage();
-					}
+				$queryParamters =  array();
+				$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
+				$queryParamters[":cs_user_password"]=trim($_POST["password"]);
+				$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
+				$queryParamters[":cs_user_id"]=trim($_POST["userid"]);
+				
+				$myDB->run($userUpdatequery, $queryParamters);
+			
+				$userRecordSet = $myDB->run($AllUserQuery);
 			}else{
 				$showContactUpdateForm =$_POST["userid"];
 				$updateUserFormErrors = $a->getErrorMessages();
-
 			}
 			 break;
 		case "deleteContact":
@@ -139,33 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			$a->setElementGroups($elementGroups);
 			if ( $a->validateForm() ){ 
 				//Values are ok now.  Time to add them to the table.
-				try{
-					$sql = "INSERT INTO  cs_user (
-							cs_user_name, 
-							cs_user_password,
-							cs_user_rights
-							)
-						VALUES (
-							:cs_user_name, 
-							:cs_user_password, 
-							:cs_user_rights
-							)";
-					$stmt = $conn->prepare($sql);
-					
-					$name = trim($_POST["uname"]);
-					$pw = trim($_POST["password"]);
-					$ur = trim($_POST["userrole"]);
-					$stmt->bindParam(':cs_user_name', $name );
-					$stmt->bindParam(':cs_user_password', $pw);
-					$stmt->bindParam(':cs_user_rights', $ur );
-					$stmt->execute();
-					
-					$userRecordSet = getUserRecordSet();
-				}
-				catch(PDOException $e)
-				{
-					//echo $sql . "<br>" . $e->getMessage();
-				}
+				
+				$queryParamters =  array();
+				$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
+				$queryParamters[":cs_user_password"]=trim($_POST["password"]);
+				$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
+				
+				$myDB->run( $userInsertquery , $queryParamters);
+				
+				$userRecordSet = $myDB->run($AllUserQuery);
 				
 			}else{
 				$newUserFormErrors = $a->getErrorMessages();

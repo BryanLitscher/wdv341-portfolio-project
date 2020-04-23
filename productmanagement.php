@@ -14,39 +14,35 @@ if (!$authorized){
 	exit();
 }
 
+if ( !isset($_SESSION["dbparams"]) ) {
+	if ( strpos( strtolower($_SERVER["HTTP_REFERER"]??""), "localhost/wdv341")>=0 || strpos( strtoupper(gethostname()), "DESKTOP")>=0 ){
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["localDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["localDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["localDBParams"]["databaseName"] ;
+	} else{
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["hostDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["hostDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["hostDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
+	}
+}
 
+require 'mypdo.php';
 require 'formvalidation.php';
-require 'dbConnect.php';
+//require 'dbConnect.php';
 
-
+$myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
 function printArray( $a ){
 	echo "<pre>";
 	print_r( $a);
 	echo "</pre>";
 }
 
-function getProductRecordSet(){
-	require 'dbConnect.php';
-	try {
-		$stmt = $conn->prepare("SELECT 
-			itemid,
-			description,
-			uos,
-			unitprice,
-			imagefile
-			FROM cs_inventory");
-		$stmt->execute();
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-		return $stmt->fetchAll();  // associative array
-	}
-	catch(PDOException $e) {
-		echo set_statement_exception_handler($conn,$e);
-		die();	
-	}
-}
-
-$productRecordSet = getProductRecordSet();
+$productRecordSet = $myDB->run($allProductQuery);
 $showDeleteConfirmForm = -1;
 $showUpdateForm = -1;
 $newProductFormErrors = array();
@@ -88,46 +84,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 					if(in_array(pathinfo($filename)["extension"], $allowed)){ 
 						if( $filesize < 1024 * 1024 ){
 							move_uploaded_file($_FILES["imagefile"]["tmp_name"], "images/" . $filename);
+							
 
-							$description=$f["description"];
-							$uos=$f["uos"];
-							$unitprice=$f["unitprice"];
-							$imagefile=$f["imagefile"];
-
-							$sql = "INSERT INTO cs_inventory (
-									description,
-									uos,
-									unitprice,
-									imagefile
-									)
-								VALUES (
-									:description, 
-									:uos, 
-									:unitprice,
-									:imagefile
-									)";
-									
-
-							//2. Create the prepared statement object
-							$stmt = $conn->prepare($sql);	//creates the 'prepared statement' object
-
-							//Bind parameters to the prepared statement object, one for each parameter
-							$stmt->bindParam(':description', $description);
-							$stmt->bindParam(':uos', $uos);
-							$stmt->bindParam(':unitprice', $unitprice);
-							$stmt->bindParam(':imagefile', $imagefile);
-
-
-							//Execute the prepared statement
-							if($stmt->execute()){
+							$queryParamters =  array();
+							$queryParamters[":description"]=trim($f["description"]);
+							$queryParamters[":uos"]=trim($f["uos"]);
+							$queryParamters[":unitprice"]=trim($f["unitprice"]);
+							$queryParamters[":imagefile"]=trim($f["imagefile"]);
+							
+							if ($myDB->run( $productInsertquery , $queryParamters)){
 								$validInsert = true;
-								$newProductMessage="Product $description recorded.  Enter next product.";
-								$description=$uos=$unitprice=$imagefile="";
+								$newProductMessage="Product " . $f["description"] . " recorded.  Enter next product.";
+							}else{
+								$newProductMessage="Update Failed. Try again.";
 							}
-							
-							//update displayed list of products
-							$productRecordSet = getProductRecordSet();
-							
+							$productRecordSet = $myDB->run($allProductQuery);
 						}else{
 							$errMsgFile = "Invalid file size";
 						}
@@ -156,14 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			//Actuatlly delete from database
 			try
 			{
-				$sql = "DELETE FROM cs_inventory WHERE itemid=". $_POST["userid"];
-				$conn->exec($sql);
-				$productRecordSet = getProductRecordSet();
+				$sql = "DELETE FROM cs_inventory WHERE itemid=". $_POST["itemid"];
+				$myDB->run($sql);
+				$productRecordSet = $myDB->run($allProductQuery);
 			}
 			catch(PDOException $e){ 
 
 			}
-			$productRecordSet = getProductRecordSet();
+			// $productRecordSet = getProductRecordSet();
+			$productRecordSet = $myDB->run($allProductQuery);
 			break;
 		case "updateProduct":
 
@@ -191,7 +163,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			}
 			
 
-
+			// echo "<pre>";
+			// print_r ($_POST);
+			// echo "</pre>";
 			$validUpdate = false;
 			$a = new validator($f);
 			$elementGroups = array(
@@ -208,39 +182,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 					if(in_array(pathinfo($filename)["extension"], $allowed)){ 
 						 if( $filesize < 1024 * 1024 ){
 							move_uploaded_file($_FILES["imagefile"]["tmp_name"], "images/" . $filename);
-							$validUpdate = true;
 							
-							$description=$f["description"];
-							$uos=$f["uos"];
-							$unitprice=$f["unitprice"];
-							$imagefile=$filename;
-							$itemid=$f["itemid"];
 							
-							try {
-
-							$sql = "UPDATE cs_inventory
-							SET 
-							description='$description',
-							uos='$uos',
-							unitprice=$unitprice,
-							imagefile='$imagefile' 
+							$queryParamters =  array();
+							$queryParamters[":description"]=trim($f["description"]);
+							$queryParamters[":uos"]=trim($f["uos"]);
+							$queryParamters[":unitprice"]=trim($f["unitprice"]);
+							$queryParamters[":imagefile"]=$filename;
+							$queryParamters[":itemid"]=trim($f["itemid"]);
 							
-							WHERE itemid=$itemid;";
-
-							// Prepare statement
-							$stmt = $conn->prepare($sql);
-
-							// execute the query
-							$stmt->execute();
-							
-							$productRecordSet = getProductRecordSet();
+							if ($myDB->run( $productUpdateQuery , $queryParamters) ){
+								$validUpdate = true;
 							}
-							catch(PDOException $e)
-							{
-							//echo $sql . "<br>" . $e->getMessage();
-							}
-
-							
+							$productRecordSet = $myDB->run($allProductQuery);
 						}else{$errMsgFile = "Invalid file size";}
 					}else{$errMsgFile = "Invalid file type";}
 				}else{$errMsgFile = "File Upload Failure";}
@@ -378,7 +332,7 @@ foreach($productRecordSet as $x){ ?>
 //echo $showDeleteConfirmForm;
 if ($showDeleteConfirmForm  == $x["itemid"]){ ?>
 <form  method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" >
-	<input type="hidden" name="userid" value="<?php echo  $x["itemid"]; ?>" >
+	<input type="hidden" name="itemid" value="<?php echo  $x["itemid"]; ?>" >
 	<button class="boldbutton" name="function" value="confirmDelete" >Confirm Deletion</button>
 	<button name=function type="submit" value="cancelUpdateUserDB">Cancel</button>
 </form>

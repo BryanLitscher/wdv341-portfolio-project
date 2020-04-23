@@ -1,9 +1,34 @@
 <?php 
 
+// echo strtolower($_SERVER["HTTP_REFERER"]??"blank");
+// echo "<br />" .gethostname();
+
+if ( !isset($_SESSION["dbparams"]) ) {
+	if ( strpos( strtolower($_SERVER["HTTP_REFERER"]??""), "localhost/wdv341")>=0 || strpos( strtoupper(gethostname()), "DESKTOP")>=0 ){
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["localDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["localDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["localDBParams"]["databaseName"] ;
+	} else{
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["hostDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["hostDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["hostDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
+	}
+}
+
+
+require 'mypdo.php';
+$myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
+
+
+
 include "Emailer.php";
 
 require 'us-state-names-abbrevs.php';
-require 'dbConnect.php';
+// require 'dbConnect.php';
 require 'formvalidation.php';
 
 date_default_timezone_set ( "America/Chicago" );
@@ -29,7 +54,7 @@ $keys = $sections["MailGun"];
 $MailgunKey =  $keys["PrivateAPIKey"] ;
 $MailgunDomain =   $keys["Domain"];
 
-
+$catalogarray=array();
 $errMessages = array();
 $formData = array();
 $formNote = "";
@@ -38,8 +63,16 @@ require 'vendor/autoload.php';
 use Mailgun\Mailgun;
 session_start();
 
+
+
 if (isset($_SESSION['user']["role"]) ){
 	$formNote="Welcome, " . $_SESSION['user']["uname"];
+}
+
+function viewArray($a){
+	echo "<pre>";
+	print_r($a);
+	echo "</pre>";
 }
 
 function validateUserForm($f ){
@@ -129,50 +162,21 @@ function sendContactEmail($contactArray){
 
 
 function getRowData($id){
-	require 'dbConnect.php';
-	try {
-		$stmt = $conn->prepare("SELECT 
-			itemid,
-			description,
-			uos,
-			unitprice,
-			imagefile
-			FROM cs_inventory
-			Where itemid=" . $id );
-		$stmt->execute();
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		
-		$r = $stmt->fetchAll();  // associative array
-		return  $r[0];
-	}
-	catch(PDOException $e) {
-		//echo "Error: " . $e->getMessage();
-		//set_connection_exception_handler($conn,$e);
-		//die();	
-	}
+	global $myDB;
+	global $selectAllInventoryByID;
+	
+	$queryParamters =  array();
+	$queryParamters[":itemid"]=trim($id);
+	$row = $myDB->run($selectAllInventoryByID, $queryParamters);
+	return (count($row))===1?$row[0]:array(); 
+	
 }
   
 $cart = $_SESSION['cart']??[];
 
+$catalogarray = $myDB->run($selectAllInventory);
+//viewArray($catalogarray);
 
-
-try {
-    $stmt = $conn->prepare("SELECT 
-		itemid,
-		description,
-		uos,
-		unitprice,
-		imagefile
-		FROM cs_inventory");
-    $stmt->execute();
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-	
-	$result = $stmt->fetchAll();  // associative array
-}
-catch(PDOException $e) {
-	echo set_statement_exception_handler($conn,$e);
-	die();	
-}
 
 
 function getCartItemPos( $cart, $id ){
@@ -200,124 +204,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 	switch ($purpose) {
 	case "shipit":
 		if( ($_POST)["submit"]??""=="Send it!"){
-			try{
-				$sql = "INSERT INTO  cs_order (
-						order_user_id, 
-						order_shipto_name,
-						order_shipto_address1,
-						order_shipto_address2,
-						order_shipto_city,
-						order_shipto_state,
-						order_shipto_zip,
-						order_shipto_shipmethod,
-						order_shipto_shipcost,
-						order_date,
-						order_time
-						)
-					VALUES (
-						:order_user_id, 
-						:order_shipto_name,
-						:order_shipto_address1,
-						:order_shipto_address2,
-						:order_shipto_city,
-						:order_shipto_state,
-						:order_shipto_zip,
-						:order_shipto_shipmethod,
-						:order_shipto_shipcost,
-						:order_date,
-						:order_time
-						)";
-				$stmt = $conn->prepare($sql);
-				
-				$order_user_id=$_SESSION['user']["userid"];
-				$order_shipto_name=$_SESSION['shipping_address']["shipto_name"];
-				$order_shipto_address1=$_SESSION['shipping_address']["shipto_address1"];
-				$order_shipto_address2=$_SESSION['shipping_address']["shipto_address2"];
-				$order_shipto_city=$_SESSION['shipping_address']["shipto_city"];
-				$order_shipto_state=$_SESSION['shipping_address']["shipto_state"];
-				$order_shipto_zip=$_SESSION['shipping_address']["shipto_zip"];
-				$order_shipto_shipmethod=$_SESSION['shipping_method']["shipmethod"];
-				$order_shipto_shipcost=$shippingcost[$_SESSION['shipping_method']["shipmethod"]];
-				$order_date=date("Y-m-d"); // YYYY-MM-DD
-				$order_time=date("H:i:s"); // 'HH:MM:SS'
-
-
-				$stmt->bindParam(':order_user_id', $order_user_id );
-				$stmt->bindParam(':order_shipto_name', $order_shipto_name);
-				$stmt->bindParam(':order_shipto_address1', $order_shipto_address1 );
-				$stmt->bindParam(':order_shipto_address2', $order_shipto_address2 );
-				$stmt->bindParam(':order_shipto_city', $order_shipto_city );
-				$stmt->bindParam(':order_shipto_state', $order_shipto_state );
-				$stmt->bindParam(':order_shipto_zip', $order_shipto_zip );
-				$stmt->bindParam(':order_shipto_shipmethod', $order_shipto_shipmethod );
-				$stmt->bindParam(':order_shipto_shipcost', $order_shipto_shipcost );
-				$stmt->bindParam(':order_date', $order_date );
-				$stmt->bindParam(':order_time', $order_time );
-				
-				$stmt->execute();
-				
-				$last_id = $conn->lastInsertId();
-				//echo $last_id;
-				
-				$sql = "INSERT INTO  cs_order_details (
-						order_details_order_id, 
-						order_details_itemid,
-						order_details_description,
-						order_details_uos,
-						order_details_unitprice,
-						order_details_imagefile,
-						order_details_qty
-						)
-					VALUES (
-						:order_details_order_id, 
-						:order_details_itemid,
-						:order_details_description,
-						:order_details_uos,
-						:order_details_unitprice,
-						:order_details_imagefile,
-						:order_details_qty
-						)";
-				$stmt = $conn->prepare($sql);
-				
-				$stmt->bindParam(':order_details_order_id', $order_details_order_id );
-				$stmt->bindParam(':order_details_itemid', $order_details_itemid );
-				$stmt->bindParam(':order_details_description', $order_details_description );
-				$stmt->bindParam(':order_details_uos', $order_details_uos );
-				$stmt->bindParam(':order_details_unitprice', $order_details_unitprice );
-				$stmt->bindParam(':order_details_imagefile', $order_details_imagefile );
-				$stmt->bindParam(':order_details_qty', $order_details_qty );
-				
-				$i = 0;
-				for( $i = 0 ; $i< count($_SESSION['cart']); $i++ ){
-					$order_details_order_id=$last_id;
-					$order_details_itemid=$_SESSION['cart'][$i]["itemid"];
-					$order_details_description=$_SESSION['cart'][$i]["description"];
-					$order_details_uos=$_SESSION['cart'][$i]["uos"];
-					$order_details_unitprice=$_SESSION['cart'][$i]["unitprice"];
-					$order_details_imagefile=$_SESSION['cart'][$i]["imagefile"];
-					$order_details_qty=$_SESSION['cart'][$i]["qty"];
-					
-					
-					$stmt->execute();
-				
-				}
-				$formNote="Thanks for the order, " . $_SESSION['user']["uname"];
-				$_SESSION['shipping_address']=array();
-				$_SESSION['cart']=array();
-				$cart=array();
-				$_SESSION['shipping_method']=array();
+			
+			$queryParamters =  array();
+			$queryParamters[":order_user_id"]=$_SESSION['user']["userid"];
+			$queryParamters[":order_shipto_name"]=$_SESSION['shipping_address']["shipto_name"];
+			$queryParamters[":order_shipto_address1"]=$_SESSION['shipping_address']["shipto_address1"];
+			$queryParamters[":order_shipto_address2"]=$_SESSION['shipping_address']["shipto_address2"];
+			$queryParamters[":order_shipto_city"]=$_SESSION['shipping_address']["shipto_city"];
+			$queryParamters[":order_shipto_state"]=$_SESSION['shipping_address']["shipto_state"];
+			$queryParamters[":order_shipto_zip"]=$_SESSION['shipping_address']["shipto_zip"];
+			$queryParamters[":order_shipto_shipmethod"]=$_SESSION['shipping_method']["shipmethod"];
+			$queryParamters[":order_shipto_shipcost"]=$shippingcost[ $_SESSION['shipping_method']["shipmethod"] ];
+			$queryParamters[":order_date"]=date("Y-m-d"); // YYYY-MM-DD
+			$queryParamters[":order_time"]=date("H:i:s"); // 'HH:MM:SS'
+			$myDB->run($insertOrderQuery, $queryParamters);
+			
+			$last_id=$myDB->getMyInsertID();
+			echo $last_id;
+			for( $i = 0 ; $i< count($_SESSION['cart']); $i++ ){
+				$queryParamters =  array();
+				$queryParamters[":order_details_order_id"]=$last_id;
+				$queryParamters[":order_details_itemid"]=$_SESSION['cart'][$i]["itemid"];
+				$queryParamters[":order_details_description"]=$_SESSION['cart'][$i]["description"];
+				$queryParamters[":order_details_uos"]=$_SESSION['cart'][$i]["uos"];
+				$queryParamters[":order_details_unitprice"]=$_SESSION['cart'][$i]["unitprice"];
+				$queryParamters[":order_details_imagefile"]=$_SESSION['cart'][$i]["imagefile"];
+				$queryParamters[":order_details_qty"]=$_SESSION['cart'][$i]["qty"];
+				$myDB->run($insertOrderDetailsQuery, $queryParamters);
 			}
-			catch(PDOException $e)
-			{
-				echo $sql . "<br>" . $e->getMessage();
-			}
-			
-			$conn = null;
-			
-			
+
+			$formNote="Thanks for the order, " . $_SESSION['user']["uname"];
+			$_SESSION['shipping_address']=array();
+			$_SESSION['cart']=array();
+			$cart=array();
+			$_SESSION['shipping_method']=array();
 		}
-			
-		
 		break;
 	case "shipping_method":
 		if( $_POST["submit"]??""==="Submit"){
@@ -771,7 +692,7 @@ elseif ($showShipMethodForm){
 <?php }else{ ?>
 	<div class="catalog">
 	<?php
-	foreach( $result as $x){
+	foreach( $catalogarray as $x){
 			echo '<div class="card">
 				<img src="images/' . $x["imagefile"] . '" width=100%>
 				<form method="POST"><input type="hidden" name="function" value="addItem">
@@ -798,7 +719,6 @@ https://commons.wikimedia.org/wiki/File:Bravo_Cheddar.jpg
 https://pixabay.com/photos/cheese-camembert-mature-cheddar-2829034/
 https://pixabay.com/photos/keens-cheddar-cheese-cheddar-3514/
 https://pixabay.com/photos/amsterdam-cheese-netherlands-170394/
-
 cs_user_id
 cs_user_name
 cs_user_password

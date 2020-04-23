@@ -105,6 +105,7 @@ class validator{
 					$errorMessages[$x] = "$x must be greater than zero";
 					$validForm =  false;
 				}
+				break;
 			case "shipto_zip":
 				if( empty($val) ){
 					$errorMessages[$x] = "Value for $x is required";
@@ -116,6 +117,7 @@ class validator{
 					$errorMessages[$x] = "Invalid $x";
 					$validForm =  false;
 				}
+				break;
 			case "shipto_address2":
 				if (htmlspecialchars($val) != $val ){
 					$errorMessages[$x] = "Special characters not allowed in $x";

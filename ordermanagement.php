@@ -1,6 +1,6 @@
 
 <?php
-require 'dbConnect.php';
+//require 'dbConnect.php';
 session_start();
 $authorized=false;
 
@@ -11,69 +11,54 @@ if (array_key_exists('user', $_SESSION)){
 if (!$authorized){
 	header("Location: index.php");
 	exit();
-	// echo "oops!";
 }
+
+
+if ( !isset($_SESSION["dbparams"]) ) {
+	if ( strpos( strtolower($_SERVER["HTTP_REFERER"]??""), "localhost/wdv341")>=0 || strpos( strtoupper(gethostname()), "DESKTOP")>=0 ){
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["localDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["localDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["localDBParams"]["databaseName"] ;
+	} else{
+		$keys = parse_ini_file('config.ini', true);
+		$_SESSION["dbparams"]["serverName"] =  $keys["hostDBParams"]["serverName"] ;
+		$_SESSION["dbparams"]["username"] =  $keys["hostDBParams"]["username"] ;
+		$_SESSION["dbparams"]["password"] =  $keys["hostDBParams"]["password"] ;
+		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
+	}
+}
+
+
+require 'mypdo.php';
+$myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
 
 $orderDetails = array();
 $showDetailsList = -1;
 
 
+$queryParamters =  array();
+$queryParamters[":userid"]=trim($_SESSION['user']['userid']);
 
-		 
-$stmt = $conn->prepare("SELECT 
-order_id,
-order_shipto_name,
-order_shipto_address1,
-order_shipto_address2,
-order_shipto_city,
-order_shipto_state,
-order_shipto_zip,
-order_date,
-order_track_no
-FROM  cs_order 
-where order_user_id=". $_SESSION['user']['userid'] .
-" order by cs_order.order_id DESC "
-);
-$stmt->execute();
-$stmt->setFetchMode(PDO::FETCH_ASSOC);
+$r = $myDB->run($allOrdersforUserQuery, $queryParamters);
+				
 
-$r = $stmt->fetchAll();  // associative array
-		
-		
 		
 if ($_SERVER['REQUEST_METHOD'] === 'POST' ) { 
-	// echo "<pre>" ;
-	// print_r($_POST);
-	// echo "</pre>" ;	
 	$purpose = $_POST["function"]??"";
 	switch ($purpose) {
 		case "show_orderinfo_form":
-			// echo "<pre>" ;
-			// print_r($_POST);
-			// echo "</pre>" ;
+				
+			$queryParamters =  array();
+			$queryParamters[":orderid"]=trim($_POST['orderid']);
 			
-			 $stmt = $conn->prepare("SELECT 
-				order_details_id,
-				order_details_order_id,
-				order_details_itemid,
-				order_details_description,
-				order_details_uos,
-				order_details_unitprice,
-				order_details_imagefile,
-				order_details_qty
-				FROM  cs_order_details 
-				where order_details_order_id=". $_POST['orderid']
-				);
-			$stmt->execute();
-			$stmt->setFetchMode(PDO::FETCH_ASSOC);
+			$orderDetails = $myDB->run($orderDetailsforOrderQuery, $queryParamters);
 			
-			$orderDetails = $stmt->fetchAll();  // associative array
 			
 			$showDetailsList = $_POST['orderid'];
 			
 			break;
-			// [function] => show_orderinfo_form
-			// [orderid] => 13
 	}
 }
 
