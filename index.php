@@ -1,10 +1,12 @@
 <?php 
 
-// echo strtolower($_SERVER["HTTP_REFERER"]??"blank");
-// echo "<br />" .gethostname();
+// echo strtolower($_SERVER["HTTP_REFERER"]??"blank") ."<br />" ;
+// echo gethostname() ."<br />" ;
+// echo strpos( strtoupper(gethostname()), "DESKTOP") ."<br />" ;
 
 if ( !isset($_SESSION["dbparams"]) ) {
-	if ( strpos( strtolower($_SERVER["HTTP_REFERER"]??""), "localhost/wdv341")>=0 || strpos( strtoupper(gethostname()), "DESKTOP")>=0 ){
+	if ( strpos( strtoupper(gethostname()), "LV83B7F")>0 ){
+		// echo "im here";
 		$keys = parse_ini_file('config.ini', true);
 		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
 		$_SESSION["dbparams"]["username"] =  $keys["localDBParams"]["username"] ;
@@ -18,7 +20,13 @@ if ( !isset($_SESSION["dbparams"]) ) {
 		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
 	}
 }
+// echo $_SESSION["dbparams"]["serverName"] . "<br />";
+// echo $_SESSION["dbparams"]["username"] . "<br />";
+// echo $_SESSION["dbparams"]["password"] . "<br />";
+// echo $_SESSION["dbparams"]["databaseName"]  . "<br />";
+		
 
+// exit();
 
 require 'mypdo.php';
 $myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
