@@ -1,11 +1,14 @@
 <?php 
-
+session_start();
+		// session_unset();
+		// session_destroy();
 // echo strtolower($_SERVER["HTTP_REFERER"]??"blank") ."<br />" ;
 // echo gethostname() ."<br />" ;
-// echo strpos( strtoupper(gethostname()), "DESKTOP") ."<br />" ;
+// echo strpos( strtoupper(gethostname()), "LV83B7F") ."<br />" ;
+// echo strpos( strtoupper("web19.us.cloudlogin.co"), "LV83B7F") ."<br />" ;
 
 if ( !isset($_SESSION["dbparams"]) ) {
-	if ( strpos( strtoupper(gethostname()), "LV83B7F")>0 ){
+	if ( strpos( strtoupper(gethostname()), "LV83B7F") !== false ){
 		// echo "im here";
 		$keys = parse_ini_file('config.ini', true);
 		$_SESSION["dbparams"]["serverName"] =  $keys["localDBParams"]["serverName"] ;
@@ -26,7 +29,7 @@ if ( !isset($_SESSION["dbparams"]) ) {
 // echo $_SESSION["dbparams"]["databaseName"]  . "<br />";
 		
 
-// exit();
+ // exit();
 
 require 'mypdo.php';
 $myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
@@ -69,7 +72,7 @@ $formNote = "";
 
 require 'vendor/autoload.php';
 use Mailgun\Mailgun;
-session_start();
+
 
 
 
@@ -78,9 +81,9 @@ if (isset($_SESSION['user']["role"]) ){
 }
 
 function viewArray($a){
-	echo "<pre>";
-	print_r($a);
-	echo "</pre>";
+	// echo "<pre>";
+	// print_r($a);
+	// echo "</pre>";
 }
 
 function validateUserForm($f ){
@@ -228,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			$myDB->run($insertOrderQuery, $queryParamters);
 			
 			$last_id=$myDB->getMyInsertID();
-			echo $last_id;
+			//echo $last_id;
 			for( $i = 0 ; $i< count($_SESSION['cart']); $i++ ){
 				$queryParamters =  array();
 				$queryParamters[":order_details_order_id"]=$last_id;
