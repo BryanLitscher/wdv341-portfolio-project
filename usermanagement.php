@@ -41,6 +41,18 @@ $newUserFormErrors = array();
 $updateUserFormErrors=array();
 $showContactUpdateForm = -1;
 $showDeleteConfirmForm = -1;
+$formNote="";
+
+function existingUser( $user, $pwd){
+	global $myDB;
+	global $usersByNamePwd;
+	
+	$queryParamters =  array();
+	$queryParamters[":cs_user_name"]= $user;
+	$queryParamters[":cs_user_password"]=$pwd;
+	return (count($myDB->run($usersByNamePwd, $queryParamters))>0)?true:false;
+
+}
 
 
 
@@ -74,14 +86,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 				);
 			$a->setElementGroups($elementGroups);
 			if ( $a->validateForm() ){ 
-				$queryParamters =  array();
-				$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
-				$queryParamters[":cs_user_password"]=trim($_POST["password"]);
-				$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
-				$queryParamters[":cs_user_id"]=trim($_POST["userid"]);
-				
-				$myDB->run($userUpdatequery, $queryParamters);
-			
+				if(! existingUser(trim($_POST["uname"]),trim($_POST["password"]) ) ){
+					$queryParamters =  array();
+					$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
+					$queryParamters[":cs_user_password"]=trim($_POST["password"]);
+					$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
+					$queryParamters[":cs_user_id"]=trim($_POST["userid"]);
+					
+					$myDB->run($userUpdatequery, $queryParamters);
+				}else{$formNote = "Duplicate User ID";}
 				$userRecordSet = $myDB->run($AllUserQuery);
 			}else{
 				$showContactUpdateForm =$_POST["userid"];
@@ -116,13 +129,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 			$a->setElementGroups($elementGroups);
 			if ( $a->validateForm() ){ 
 				//Values are ok now.  Time to add them to the table.
-				
-				$queryParamters =  array();
-				$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
-				$queryParamters[":cs_user_password"]=trim($_POST["password"]);
-				$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
-				
-				$myDB->run( $userInsertquery , $queryParamters);
+				if(! existingUser(trim($_POST["uname"]),trim($_POST["password"]) ) ){
+					$queryParamters =  array();
+					$queryParamters[":cs_user_name"]=trim($_POST["uname"]);
+					$queryParamters[":cs_user_password"]=trim($_POST["password"]);
+					$queryParamters[":cs_user_rights"]=trim($_POST["userrole"]);
+					
+					$myDB->run( $userInsertquery , $queryParamters);
+				}else{$formNote = "Duplicate User ID";}
 				
 				$userRecordSet = $myDB->run($AllUserQuery);
 				
@@ -154,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 	</head>
 
 	<body>
+<div class="navbar"><div  class="toolbar_message"><?php echo $formNote; ?></div></div>
 <h1>User Management</h1>
 
 <h2>Add User</h2>
