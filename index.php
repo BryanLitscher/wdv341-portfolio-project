@@ -695,7 +695,7 @@ elseif ($showShipMethodForm){
 	foreach( $catalogarray as $x){
 			echo '<div class="card">
 				<img src="images/' . $x["imagefile"] . '" width=100%>
-				<form method="POST"><input type="hidden" name="function" value="addItem" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '">
+				<form method="POST" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '"   ><input type="hidden" name="function" value="addItem" >
 					<ul>
 						<li>' . $x["description"] . '</li>
 						<li>Price: $' . number_format($x["unitprice"],2) . " " . $x["uos"] . ' </li>
