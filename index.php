@@ -1,11 +1,6 @@
 <?php 
 session_start();
-		// session_unset();
-		// session_destroy();
-// echo strtolower($_SERVER["HTTP_REFERER"]??"blank") ."<br />" ;
-// echo gethostname() ."<br />" ;
-// echo strpos( strtoupper(gethostname()), "LV83B7F") ."<br />" ;
-// echo strpos( strtoupper("web19.us.cloudlogin.co"), "LV83B7F") ."<br />" ;
+
 
 if ( !isset($_SESSION["dbparams"]) ) {
 	if ( strpos( strtoupper(gethostname()), "LV83B7F") !== false ){
@@ -23,13 +18,7 @@ if ( !isset($_SESSION["dbparams"]) ) {
 		$_SESSION["dbparams"]["databaseName"] =  $keys["hostDBParams"]["databaseName"] ;
 	}
 }
-// echo $_SESSION["dbparams"]["serverName"] . "<br />";
-// echo $_SESSION["dbparams"]["username"] . "<br />";
-// echo $_SESSION["dbparams"]["password"] . "<br />";
-// echo $_SESSION["dbparams"]["databaseName"]  . "<br />";
-		
 
- // exit();
 
 require 'mypdo.php';
 $myDB = new DB($_SESSION["dbparams"]["serverName"],$_SESSION["dbparams"]["username"], $_SESSION["dbparams"]["password"], $_SESSION["dbparams"]["databaseName"] );
@@ -465,7 +454,7 @@ $conn = null;
 
 	<body>
 	<?php if($showLoginForm){ ?>
-		<form method="POST" action=<?php htmlspecialchars($_SERVER["PHP_SELF"])?>>
+		<form method="POST" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\"" ;?>>
 			<p>
 			<label for="username">User name:</label>
 			<input name="uname" id="username"> 
@@ -482,7 +471,7 @@ $conn = null;
 	<?php }elseif(!$showContactForm){ ?>
 		<div class="navbar">
 			<div  class="toolbar_message"><?php echo $formNote; ?></div>
-			<form method="post" class="buttongroup">
+			<form method="post" class="buttongroup" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 				<?php
 				if(isset($_SESSION['user']["role"])){
 					if($_SESSION['user']["role"]==="super" ){ ?>
@@ -569,7 +558,7 @@ $conn = null;
 				<div class="total" ><?php echo "$" . number_format($x["unitprice"]*$x["qty"], 2) ?></div>
 				<div class="can">
 					<?php if( !$showAddressForm  && !$showShipMethodForm  && !$showOrderCommitForm){ ?>
-					<form method="post">
+					<form method="post" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 					<input type="hidden" name="cartid" value="<?php echo $x["itemid"] ?>" >
 					<input type="hidden" name="function" value="cart">
 					<input type="image" alt="can" src="images\icon-3695104_640.png" >
@@ -580,7 +569,7 @@ $conn = null;
 		<?php	$grandTotal +=$x["unitprice"]*$x["qty"];
 		}
 		if ( !$showAddressForm   && !$showShipMethodForm   && !$showOrderCommitForm){
-			echo "<form method='post'><button name='function' value='placeorder'>Place Order for $" . number_format($grandTotal,2) . "</button></form>";
+			echo "<form method='post' action='". htmlspecialchars($_SERVER["PHP_SELF"]) . "'><button name='function' value='placeorder'>Place Order for $" . number_format($grandTotal,2) . "</button></form>";
 		}else{?>
 			<div class="cartsummary">
 				<div class="bigblank"><h3>Total Merchandise</h3></div>
@@ -613,7 +602,7 @@ $final_charge = $grandTotal + $shipping_amount;
 				<div class="total" >$<?php echo number_format($final_charge,2) ?></div>
 				<DIV CLASS="CAN"></div>
 			</DIV>
-<form method='post' class="bigsubmit">
+<form method='post' class="bigsubmit" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\"";?>>
 
 	<input type="hidden" name="function" id="function" value="shipit">
 	<input type="submit" name="submit" value="Send it!">
@@ -635,7 +624,7 @@ elseif ($showShipMethodForm){
 	echo "</ul>\n";
 	?>
 	
-<form method="post" class="bigsubmit">
+<form method="post" class="bigsubmit" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
   <p>Please select your shipping method.  Consider your weather to ensure that your product arrives in good condition:</p>
   <input type="radio" id="nextday" name="shipmethod" value="nextday">
   <label for="nextday">Next Day - $10 </label><br>
@@ -652,7 +641,7 @@ elseif ($showShipMethodForm){
 <?php	
 }elseif ( $showAddressForm ){?>
 <h2>Shipping Address</h2>
-<form method="post" class="shipping_address_form">
+<form method="post" class="shipping_address_form" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 			<p>
 				<label for="shipto_name">Name</lable>
 				<input id="shipto_name" name="shipto_name" value="<?php echo $shipto_FormData["shipto_name"]??""; ?>">
@@ -706,7 +695,7 @@ elseif ($showShipMethodForm){
 	foreach( $catalogarray as $x){
 			echo '<div class="card">
 				<img src="images/' . $x["imagefile"] . '" width=100%>
-				<form method="POST"><input type="hidden" name="function" value="addItem">
+				<form method="POST"><input type="hidden" name="function" value="addItem" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '">
 					<ul>
 						<li>' . $x["description"] . '</li>
 						<li>Price: $' . number_format($x["unitprice"],2) . " " . $x["uos"] . ' </li>

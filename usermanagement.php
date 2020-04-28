@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 <h1>User Management</h1>
 
 <h2>Add User</h2>
-		<form name="adduser" method="POST" action=<?php htmlspecialchars($_SERVER["PHP_SELF"])?> >
+		<form name="adduser" method="POST"  action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?> >
 			<p>
 				<label for="username">User name:</label>
 				<input name="uname" id="username"> 
@@ -202,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 
 foreach($userRecordSet as $x=>$y){ ?>
 <div class="usersection">
-	<form method="POST" class="update_delete">
+	<form method="POST" class="update_delete"  action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 		<div class="recordactionselect">
 			<button name="function" type="submit" value="updateContact">Update</button>
 			<button name="function" type="submit" value="deleteContact">Delete</button>

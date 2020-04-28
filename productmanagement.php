@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 <!-- unitprice -->
 <!-- imagefile -->
 		<p><?php echo  $newProductMessage ?></p>
- 		<form id="newProductForm" method="POST" enctype="multipart/form-data" >
+ 		<form id="newProductForm" method="POST" enctype="multipart/form-data" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 			<p>
 				<label for="username">Description:</label>
 				<input type="text" name="description" id="description" value='<?php echo  $newProductDefaultValues["description"]??"" ?>'> 
@@ -312,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
 <?php
 foreach($productRecordSet as $x){ ?>
 <div class="usersection" id="item<?php echo $x["itemid"]; ?>">
-	<form method="post" class="update_delete">
+	<form method="post" class="update_delete" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?>>
 		<div class="recordactionselect">
 			<button name="function" type="submit" value="updateProduct">Update</button>
 			<button name="function" type="submit" value="deleteProduct">Delete</button>

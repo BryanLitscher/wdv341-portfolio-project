@@ -109,7 +109,7 @@ foreach( $r as $x ){
 			$date=date_create($x["order_date"]);
 ?>
 			
-	<form method="post" class="order" id="order<?php echo $x["order_id"] ?>">
+	<form method="post" class="order" id="order<?php echo $x["order_id"] ?>" action=<?php echo "\"" . htmlspecialchars($_SERVER["PHP_SELF"]) . "\""; ?> >
 		<div>
 			<ul>
 				<li>Order No <?php echo $x["order_id"] ?><li>
