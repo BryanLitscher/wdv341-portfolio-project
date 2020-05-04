@@ -411,8 +411,7 @@ $conn = null;
 
 
 <!DOCTYPE html>
-<!-- https://phppot.com/demo/simple-php-shopping-cart/index.php?action=add&code=USB02 -->
-<!-- https://phppot.com/php/simple-php-shopping-cart/ -->
+
 <html lang="en">
 
 	<head>
