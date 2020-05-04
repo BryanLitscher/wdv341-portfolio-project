@@ -81,21 +81,12 @@ function validateUserForm($f ){
 	$elementGroups = array(	);
 	$a->setElementGroups($elementGroups);
 	if ( $a->validateForm() ){ 
-		require 'dbConnect.php';
-		try {
-		$stmt = $conn->prepare("SELECT 
-			cs_user_id,
-			cs_user_name,
-			cs_user_password,
-			cs_user_rights
-			FROM cs_user
-			Where cs_user_name='" . $f["uname"] . 
-			"' and cs_user_password='" . $f["password"]. "'");
-		$stmt->execute();
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		
-		$r = $stmt->fetchAll();  // associative array
-		
+		global $myDB;
+		global $usersByNamePwd;
+		$queryParamters =  array();
+		$queryParamters[":cs_user_name"]=$f["uname"];
+		$queryParamters[":cs_user_password"]=$f["password"];
+		$r = $myDB->run($usersByNamePwd, $queryParamters);
 		
 		if (count($r) === 1 ){
 			$sessionValues["uname"]=$r[0]["cs_user_name"];
@@ -103,12 +94,7 @@ function validateUserForm($f ){
 			$sessionValues["userid"] = $r[0]["cs_user_id"];
 			$_SESSION['user'] = $sessionValues;
 			return true;
-			}else{return false;}
-		}
-		catch(PDOException $e) {
-			//echo "Error: " . $e->getMessage();
-			return false;
-		}
+		}else{return false;}
 	}else{
 		//print_r($a->getErrorMessages());
 		return false;
